@@ -45,11 +45,13 @@ knitr::kable(models)
 ## Daily Erosion Project - Expansion
 
 Currently
+
 - ~200,000 runs/day
 - start at midnight, done by 6am
 - single server parallelism
 
 Expansion
+
 - Midwest
 - U.S.
 - World
@@ -72,9 +74,6 @@ Expansion
 ## Scientific questions
 
 - Out-of-sample prediction accuracy
-    - Soil loss
-    - Runoff
-    - Detachment
 - Relative importance
     - Profile
         - Position
@@ -209,7 +208,7 @@ Calculate **scaled-integrated weight**:
 
 # Summary
 
-## Summary
+## Novelty
 
 Introduced
 
@@ -232,4 +231,7 @@ Results
     - Field data
     - Remote sensing data
     
+## More information
 
+- Slides: <>
+- 
