@@ -1,0 +1,235 @@
+---
+title: "GPs with Functional Inputs for WEPP"
+author: "Jarad Niemi"
+date: "2023-06-15"
+format: revealjs
+---
+
+```{r}
+library("tidyverse")
+library("knitr")
+```
+
+## (Some) Computer Models in Agricultre
+
+```{r}
+models <- tribble(
+  ~name, ~developer, ~date, 
+  "WEPP", "USDA", 1990, 
+  "Agro-IBIS", "Wisconsin", 1990,
+  "APSIM", "CSIRO (Australia)", 2007, 
+  # "APSIM Next Gen", "CSIRO (Australia)", 2014, 
+  # "CLEM",NA,NA,"livestock",
+  # "IMPACT",NA,NA,NA,
+  # "SEAMLESS",NA,NA,NA,
+  # "NUANCES-FARMSIM",NA,NA,NA,
+  # "FarmDESIGN",NA,NA,NA,
+  "Cycles", "Penn State University", 2020, 
+  "CyclesL", "Penn State University", 2023,
+  "HydroGeoSphere", "Iowa State University", 2023
+)
+
+knitr::kable(models)
+```
+
+# [Daily Erosion Project](https://www.dailyerosion.org/)
+
+## Daily Erosion Project - Precipitation
+
+![](fig/dep_precipitation)
+
+## Daily Erosion Project - Soil Loss
+
+![](fig/dep_soilloss)
+
+## Daily Erosion Project - Expansion
+
+Currently
+- ~200,000 runs/day
+- start at midnight, done by 6am
+- single server parallelism
+
+Expansion
+- Midwest
+- U.S.
+- World
+
+
+# [Water Erosion Prediction Project (WEPP)](https://www.fs.usda.gov/ccrc/tool/watershed-erosion-prediction-project-wepp)
+
+## WEPP
+
+![](fig/wepp)
+
+## WEPP Experiment - Profile
+
+![](fig/profile)
+
+## WEPP Experiment - Length and Slope
+
+![](fig/length_and_slope)
+
+## Scientific questions
+
+- Out-of-sample prediction accuracy
+    - Soil loss
+    - Runoff
+    - Detachment
+- Relative importance
+    - Profile
+        - Position
+    - Length
+    - Mean Slope
+
+
+# Gaussian Process Emulators
+
+## Emulator
+
+Deterministic computer model
+
+$$Y = f(X)$$
+
+for
+
+- input $X$
+- output $Y$
+
+An *emulator* is an estimate of $f$, i.e. $\widehat{f}$.
+
+## Gaussian Process
+
+For $f:$ &Xscr; $\to$ &Yscr;, assume
+$$f \sim GP(\mu, k)$$
+
+for 
+
+- mean function $\mu:$ &Xscr; $\to \mathbb{R}$ and
+- covariance function $k:$ &Xscr; $\times$ &Xscr; $\to \mathbb{R}^{+}$.
+
+For simplicity, $\mu(x) = 0$. 
+
+
+## Data
+
+For a collection of data $(Y_i, X_i)$ for $i=1,\ldots,n$, 
+we have 
+
+$$Y = (Y_1,\ldots,Y_n)^\top \sim N(0, \Sigma)$$
+
+where
+
+$$\Sigma_{i,j} = k(x_i,x_j).$$
+
+For prediction at a location $\widetilde{x}$, 
+we have the conditional distribution $\widetilde{y}|Y$
+which involves covariances $k(x_i, \widetilde{x})$ for all $i$. 
+
+## Distance-based covariance kernel
+
+For any &Xscr;, let 
+$$k(x_i,x_j) = \sigma^2 e^{-d(x_i,x_j)/2}$$
+for spatial variance $\sigma^2$ and some distance function $d(x_i,x_j)$. 
+
+For example,
+
+- squared exponential (Gaussian) covariance
+- automatic relevance determination
+- automatic dynamic relevance determination
+
+
+## Squared-exponential covariance
+
+If $x \in \mathbb{R}$, the *squared-exponential (Gaussian) covariance* kernel is 
+$$d(x_i,x_j) = w (x_i-x_j)^2$$
+where $w$ is the weight ($1/w$ is the length-scale/range).
+
+
+## Automatic relevance determination
+
+If $x \in \mathbb{R}^P$, the *automatic relevance determination* kernel is 
+$$d(x_i,x_j) = \sum_{p=1}^P w_p [x_{i,p}-x_{j,p}]^2$$
+where $w_p$ controls the strength of the relationship in the $p$th dimension:
+
+- small $w_p$ indicates large differences lead to small distances
+- large $w_p$ indicates small differences lead to large distances
+
+
+## Automatic dynamic relevance determination
+
+If $x \in$ &Hscr; (Hilbert space), 
+the *automatic dynamic relevance determination* kernel is 
+$$d(x_i,x_j) = \int w(t) [x_{i}(t)-x_{j}(t)]^2 dt$$
+where for some weight function $w:$ &Tscr; $\to \mathbb{R}^+$. 
+WLOG &Tscr; = [0,1].
+
+
+# Automatic dynamic relevance determination (ADRD)
+
+## Asymmetric double exponential
+
+![](fig/alf)
+
+## Fourier expansion
+
+![](fig/few)
+
+## B-splines and hinges
+
+![](fig/bsplines)
+
+
+## Combined
+
+Combine hillslope profile, length, and mean slope into a single correlation
+function:
+
+![](fig/combined)
+
+Calculate **scaled-integrated weight**:
+
+![](fig/siw)
+
+
+
+# Results
+
+## Out-of-sample prediction accuracy
+
+![](fig/prediction_accuracy)
+
+## Profile, length, and slope relevance
+
+![](fig/estimated_relevance)
+
+## Hillslope profile relevance
+
+![](fig/estimated_weight_function)
+
+
+# Summary
+
+## Summary
+
+Introduced
+
+- Automatic dynamic relevance determination
+- Variety of weight functions
+
+Results
+
+- Similar prediction accuracy
+- Informative relevance
+
+
+## Future questions
+
+- Calibration
+- Curse of big data
+- Design
+- Shift-invariant distance function
+- Data Fusion
+    - Field data
+    - Remote sensing data
+    
+
