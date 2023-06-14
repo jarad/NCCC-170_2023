@@ -1,8 +1,12 @@
 ---
 title: "GPs with Functional Inputs for WEPP"
-author: "Jarad Niemi"
+author: "Jarad Niemi and Luis Damiano"
 date: "2023-06-15"
-format: revealjs
+format: 
+  revealjs:
+    theme: serif
+    css: styles.css
+slide-number: true
 ---
 
 ```{r}
@@ -10,7 +14,7 @@ library("tidyverse")
 library("knitr")
 ```
 
-## (Some) Computer Models in Agricultre
+## Computer Models in Agriculture
 
 ```{r}
 models <- tribble(
@@ -32,6 +36,36 @@ models <- tribble(
 knitr::kable(models)
 ```
 
+## Input-Output
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+Inputs ($X$):
+
+- Topography
+- Soil type
+- Management
+- Weather
+
+::: 
+
+::: {.column width="50%"}
+
+Outputs ($Y$):
+
+- Yield
+- Nutrients
+- Water
+- Soil
+
+::: 
+
+::::
+
+
+
 # [Daily Erosion Project](https://www.dailyerosion.org/)
 
 ## Daily Erosion Project - Precipitation
@@ -44,11 +78,13 @@ knitr::kable(models)
 
 ## Daily Erosion Project - Expansion
 
-Currently
+Currently (Iowa and some surrounding regions)
 
 - ~200,000 runs/day
 - start at midnight, done by 6am
 - single server parallelism
+
+. . . 
 
 Expansion
 
@@ -74,11 +110,15 @@ Expansion
 ## Scientific questions
 
 - Out-of-sample prediction accuracy
+    - Soil loss
+
+. . . 
+
 - Relative importance
     - Profile
         - Position
     - Length
-    - Mean Slope
+    - Mean slope
 
 
 # Gaussian Process Emulators
@@ -94,6 +134,8 @@ for
 - input $X$
 - output $Y$
 
+. . .
+
 An *emulator* is an estimate of $f$, i.e. $\widehat{f}$.
 
 ## Gaussian Process
@@ -101,12 +143,20 @@ An *emulator* is an estimate of $f$, i.e. $\widehat{f}$.
 For $f:$ &Xscr; $\to$ &Yscr;, assume
 $$f \sim GP(\mu, k)$$
 
+. . .
+
 for 
+
+::: {.incremental}
 
 - mean function $\mu:$ &Xscr; $\to \mathbb{R}$ and
 - covariance function $k:$ &Xscr; $\times$ &Xscr; $\to \mathbb{R}^{+}$.
 
-For simplicity, $\mu(x) = 0$. 
+:::
+
+. . . 
+
+For simplicity, $\mu(x) = 0$.
 
 
 ## Data
@@ -116,12 +166,16 @@ we have
 
 $$Y = (Y_1,\ldots,Y_n)^\top \sim N(0, \Sigma)$$
 
+. . .
+
 where
 
 $$\Sigma_{i,j} = k(x_i,x_j).$$
 
-For prediction at a location $\widetilde{x}$, 
-we have the conditional distribution $\widetilde{y}|Y$
+. . .
+
+For prediction at a new location $\widetilde{x}$, 
+we have the conditional distribution $\widetilde{Y}|y$
 which involves covariances $k(x_i, \widetilde{x})$ for all $i$. 
 
 ## Distance-based covariance kernel
@@ -130,28 +184,44 @@ For any &Xscr;, let
 $$k(x_i,x_j) = \sigma^2 e^{-d(x_i,x_j)/2}$$
 for spatial variance $\sigma^2$ and some distance function $d(x_i,x_j)$. 
 
+. . .
+
 For example,
+
+::: {.incremental}
 
 - squared exponential (Gaussian) covariance
 - automatic relevance determination
 - automatic dynamic relevance determination
 
+:::
 
-## Squared-exponential covariance
+## Squared-exponential kernel
 
-If $x \in \mathbb{R}$, the *squared-exponential (Gaussian) covariance* kernel is 
+If $x \in \mathbb{R}$, 
+
+. . .
+
+the *squared-exponential (Gaussian) covariance* kernel is 
 $$d(x_i,x_j) = w (x_i-x_j)^2$$
+
+. . . 
+
 where $w$ is the weight ($1/w$ is the length-scale/range).
 
 
 ## Automatic relevance determination
 
-If $x \in \mathbb{R}^P$, the *automatic relevance determination* kernel is 
-$$d(x_i,x_j) = \sum_{p=1}^P w_p [x_{i,p}-x_{j,p}]^2$$
-where $w_p$ controls the strength of the relationship in the $p$th dimension:
+If $x \in \mathbb{R}^P$, 
 
-- small $w_p$ indicates large differences lead to small distances
-- large $w_p$ indicates small differences lead to large distances
+. . .
+
+the *automatic relevance determination* kernel is 
+$$d(x_i,x_j) = \sum_{p=1}^P w_p [x_{i,p}-x_{j,p}]^2$$
+
+. . .
+
+where $w_p$ controls the strength of the relationship in the $p$th dimension.
 
 
 ## Automatic dynamic relevance determination
@@ -159,7 +229,13 @@ where $w_p$ controls the strength of the relationship in the $p$th dimension:
 If $x \in$ &Hscr; (Hilbert space), 
 the *automatic dynamic relevance determination* kernel is 
 $$d(x_i,x_j) = \int w(t) [x_{i}(t)-x_{j}(t)]^2 dt$$
-where for some weight function $w:$ &Tscr; $\to \mathbb{R}^+$. 
+
+. . .
+
+for some weight function $w:$ &Tscr; $\to \mathbb{R}^+$. 
+
+. . .
+
 WLOG &Tscr; = [0,1].
 
 
@@ -184,6 +260,8 @@ Combine hillslope profile, length, and mean slope into a single correlation
 function:
 
 ![](fig/combined)
+
+. . .
 
 Calculate **scaled-integrated weight**:
 
@@ -233,5 +311,10 @@ Results
     
 ## More information
 
-- Slides: <>
-- 
+- Webpage: [jarad.me](http://jarad.me/)
+- [Slides](https://www.jarad.me/research/presentations/JaradNiemi_NCCC-170_2023.html)
+- Luis Damiano's PhD Dissertation (Link TBD)
+
+. . .
+
+### Thank you! {.center}
