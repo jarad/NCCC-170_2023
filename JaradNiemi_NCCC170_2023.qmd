@@ -9,14 +9,14 @@ format:
 slide-number: true
 ---
 
-```{r}
+```{r packages}
 library("tidyverse")
 library("knitr")
 ```
 
 ## Computer Models in Agriculture
 
-```{r}
+```{r computer-models-in-agriculture}
 models <- tribble(
   ~name, ~developer, ~date, 
   "WEPP", "USDA", 1990, 
@@ -313,7 +313,7 @@ Results
 
 - Webpage: [jarad.me](http://jarad.me/)
 - [Slides](https://www.jarad.me/research/presentations/JaradNiemi_NCCC-170_2023.html)
-- Luis Damiano's PhD Dissertation (Link TBD)
+- Luis Damiano's [PhD Dissertation](https://dr.lib.iastate.edu/handle/20.500.12876/azJ4x0Gv)
 
 . . .
 
